@@ -7,3 +7,5 @@ const WeaveWagerModule = buildModule("WeaveWager", (m) => {
 });
 
 export default WeaveWagerModule;
+
+// https://hardhat.org/ignition/docs/guides/deploy
