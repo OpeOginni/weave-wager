@@ -20,7 +20,7 @@ contract WeaveWager {
     address public owner;
 
     // Mapping of match IDs to their creator's address
-    mapping(uint256 => address) public gameCreators;
+    mapping(uint256 => address) public wagerCreator;
 
     // Mapping of user address to the IDs of Wagers they joined
     mapping(address => uint256[]) public userWagers;
@@ -38,6 +38,9 @@ contract WeaveWager {
 
     // mapping of the id to the wager
     mapping(uint256 => Wager) public wagers;
+
+    // mapping of the gameId to the number of wagers created for that game
+    mapping(uint256 => uint256) public gameWagerNumber;
 
     // Event emitted when a new wager is created
     event WagerCreated(uint256 indexed wagerId, address indexed creator, uint256 matchId, uint256 stake);
@@ -73,7 +76,7 @@ contract WeaveWager {
         });
 
         // Record the creator of the game
-        gameCreators[newWager.id] = msg.sender;
+        wagerCreator[newWager.id] = msg.sender;
         // Record the creator as a participant
         userWagers[msg.sender].push(newWager.id);
 
@@ -81,6 +84,7 @@ contract WeaveWager {
 
         wagers[totalWager] = newWager;
 
+        gameWagerNumber[_matchId] = gameWagerNumber[_matchId] + 1;
         // Emit event
         emit WagerCreated(newWager.id, msg.sender, _matchId, _stake);
     }
@@ -172,6 +176,10 @@ contract WeaveWager {
 
     function getUserWagers(address _user) public view returns (uint256[] memory) {
         return userWagers[_user];
+    }
+
+    function getNumberOfWagers(uint256 _gameId) public view returns (uint256) {
+        return gameWagerNumber[_gameId];
     }
 
     function increaseWagerEntry(uint256 _wagerId) private {
