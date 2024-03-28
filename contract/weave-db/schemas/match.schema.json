@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "required": ["match_id", "home_team", "away_team", "match_date"],
+  "properties": {
+    "match_id": {
+      "type": "string"
+    },
+    "home_team": {
+      "type": "string"
+    },
+    "away_team": {
+      "type": "string"
+    },
+    "match_date": {
+      "type": "number"
+    }
+  }
+}

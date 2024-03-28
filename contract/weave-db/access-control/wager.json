@@ -1,0 +1,12 @@
+{
+  "allow create": {
+    "and": [
+      {
+        "==": [{ "var": "request.auth.signer" }, { "var": "resource.newData.creator_address" }]
+      },
+      {
+        "==": [{ "var": "request.block.timestamp" }, { "var": "resource.newData.match_date" }]
+      }
+    ]
+  }
+}

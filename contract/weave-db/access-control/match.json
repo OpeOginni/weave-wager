@@ -1,0 +1,22 @@
+{
+  "allow create": {
+    "==": [
+      {
+        "var": "request.auth.signer"
+      },
+      {
+        "var": "contract.owners"
+      }
+    ]
+  },
+  "allow update": {
+    "==": [
+      {
+        "var": "request.auth.signer"
+      },
+      {
+        "var": "resource.setter"
+      }
+    ]
+  }
+}

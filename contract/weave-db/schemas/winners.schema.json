@@ -1,0 +1,8 @@
+{
+  "type": "object",
+  "required": ["wager_id", "winners"],
+  "properties": {
+    "wager_id": { "type": "string" },
+    "user_address": { "type": "array" }
+  }
+}

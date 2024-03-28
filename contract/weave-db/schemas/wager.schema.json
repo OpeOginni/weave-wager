@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "required": ["wager_id", "creator_address", "match_id", "stake_amount", "max_participants", "created_at"],
+  "properties": {
+    "wager_id": {
+      "type": "string"
+    },
+    "creator_address": {
+      "type": "string"
+    },
+    "match_id": {
+      "type": "string"
+    },
+    "stake_amount": {
+      "type": "number"
+    },
+    "max_participants": {
+      "type": "number"
+    },
+    "created_at": {
+      "type": "number"
+    }
+  }
+}

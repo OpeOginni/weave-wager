@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "required": ["wager_id", "user_address", "predicted_score"],
+  "properties": {
+    "wager_id": { "type": "string" },
+    "user_address": { "type": "string" },
+    "predicted_score": { "type": "string" }
+  }
+}
