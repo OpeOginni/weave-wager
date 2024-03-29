@@ -2,20 +2,40 @@ import { useWeaveDBContext } from "../../providers/WeaveDBContext";
 import CreateWagerForm from "../../components/CreateWagerForm";
 import { Minus } from "lucide-react";
 import { useRouter } from "next/router";
+import { useReadContract, useAccount } from "wagmi";
 import { useEffect, useState } from "react";
+import { hasCreatedMatchWagerAbi } from "../../abi/weaveWager";
 
 export default function CreateWagerPage() {
   const router = useRouter();
+  const { address } = useAccount();
 
   const [match, setMatch] = useState(null);
 
   const matchId = router.query.match_id;
   const weaveDB = useWeaveDBContext();
 
+  const { data, isPending, error } = useReadContract({
+    address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
+    abi: hasCreatedMatchWagerAbi,
+    functionName: "hasCreatedMatchWager",
+    args: [BigInt(Number(matchId || 0)), address],
+    query: { enabled: !!matchId },
+  });
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     async function getMatch() {
-      if (weaveDB) {
+      if (weaveDB && data.result) {
+        if (data.result === true) {
+          const fetchedWager = await weaveDB.get(
+            "wagers",
+            `${matchId}-${address}`
+          );
+
+          return router.push(`/wager/${fetchedWager.wager_id}`);
+        }
+
         const fecthedMatch = await weaveDB.get(
           "matches",
           ["match_id"],
@@ -32,7 +52,7 @@ export default function CreateWagerPage() {
     }
 
     getMatch();
-  }, [matchId, weaveDB]);
+  }, [matchId, weaveDB, data?.result]);
   return (
     <div className="flex flex-col min-h-screen">
       <div className="flex flex-col border border-black rounded-xl mx-[15rem] my-7 py-14">
@@ -66,7 +86,7 @@ export default function CreateWagerPage() {
 
         <div className="text-center pt-5 pb-2">
           {match ? (
-            <p className="text-xl">{match.match_date}</p>
+            <p className="text-xl">{match.match_timestamp}</p>
           ) : (
             // Render a loading message or spinner here
             <p>Loading...</p>
@@ -74,7 +94,12 @@ export default function CreateWagerPage() {
         </div>
       </div>
       <div className="py-8 mx-[25rem]">
-        <CreateWagerForm />
+        {match ? (
+          <CreateWagerForm match_timestamp={match.match_timestamp} />
+        ) : (
+          // Render a loading message or spinner here
+          <p>Loading...</p>
+        )}
       </div>
     </div>
   );

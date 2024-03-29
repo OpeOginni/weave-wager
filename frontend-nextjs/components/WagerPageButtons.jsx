@@ -125,9 +125,16 @@ export function WagerButton() {
   );
 }
 
-export function ShareWagerButton({ id }) {
+export function ShareWagerButton({ wager_id }) {
   return (
-    <Button className="flex flex-row gap-2 border">
+    <Button
+      className="flex flex-row gap-2 border"
+      onClick={() => {
+        navigator.clipboard.writeText(
+          `http://localhost:3000/wager/${wager_id}`
+        );
+      }}
+    >
       SHARE WAGER <Copy />
     </Button>
   );

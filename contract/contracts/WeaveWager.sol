@@ -42,6 +42,8 @@ contract WeaveWager {
     // mapping of the gameId to the number of wagers created for that game
     mapping(uint256 => uint256) public gameWagerNumber;
 
+    mapping(uint256 => mapping(address => bool)) private matchWagerCreated;
+
     // Event emitted when a new wager is created
     event WagerCreated(uint256 indexed wagerId, address indexed creator, uint256 matchId, uint256 stake);
 
@@ -59,6 +61,7 @@ contract WeaveWager {
         require(_stake > 0, 'Stake must be greater than zero');
         require(_maxEntries > 1, 'Max Entries must be greater than zero');
         require(msg.value == _stake, 'Sent Value must be equal to Stake');
+        require(!matchWagerCreated[_matchId][msg.sender], 'User already created wager for this game');
 
         totalWager = totalWager + 1;
 
@@ -82,7 +85,11 @@ contract WeaveWager {
 
         wagerEntries[newWager.id].push(msg.sender);
 
+        wagerParticipants[newWager.id][msg.sender] = true;
+
         wagers[totalWager] = newWager;
+
+        matchWagerCreated[_matchId][msg.sender] = true;
 
         gameWagerNumber[_matchId] = gameWagerNumber[_matchId] + 1;
         // Emit event
@@ -182,16 +189,20 @@ contract WeaveWager {
         return gameWagerNumber[_gameId];
     }
 
+    function isParticipant(uint256 _wagerId, address _address) public view returns (bool) {
+        return wagerParticipants[_wagerId][_address];
+    }
+
+    function hasCreatedMatchWager(uint256 _matchId, address _address) public view returns (bool) {
+        return matchWagerCreated[_matchId][_address];
+    }
+
     function increaseWagerEntry(uint256 _wagerId) private {
         wagers[_wagerId].totalEntries = wagers[_wagerId].totalEntries + 1;
     }
 
     function increaseWagerTotalStake(uint256 _wagerId) private {
         wagers[_wagerId].totalStaked = wagers[_wagerId].totalStaked + wagers[_wagerId].stake;
-    }
-
-    function isParticipant(uint256 _wagerId, address _address) private view returns (bool) {
-        return wagerParticipants[_wagerId][_address];
     }
 
     modifier onlyOwner() {

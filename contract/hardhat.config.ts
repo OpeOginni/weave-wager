@@ -14,7 +14,7 @@ const config: HardhatUserConfig = {
   solidity: '0.8.25',
   networks: {
     hardhat: {
-      chainId: 1337,
+      chainId: 31337,
     },
     arbitrumSepolia: {
       url: 'https://sepolia-rollup.arbitrum.io/rpc',
