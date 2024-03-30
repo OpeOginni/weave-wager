@@ -1,5 +1,6 @@
 import "../styles/globals.css";
 import "@rainbow-me/rainbowkit/styles.css";
+const dotenv = require("dotenv");
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider, http } from "wagmi";
@@ -7,9 +8,12 @@ import { arbitrum, arbitrumSepolia, hardhat } from "wagmi/chains";
 import { getDefaultConfig, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { WeaveDBProvider } from "../providers/WeaveDBContext";
 import HeaderComponent from "../components/HeaderComponent";
+
+dotenv.config();
+
 const config = getDefaultConfig({
   appName: "Weave Wager",
-  projectId: "YOUR_PROJECT_ID",
+  projectId: process.env.WALLET_CONNECT_ID,
   chains: [
     // arbitrum,
     hardhat,
