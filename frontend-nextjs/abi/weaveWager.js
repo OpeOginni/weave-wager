@@ -742,3 +742,24 @@ export const hasCreatedMatchWagerAbi = [
     type: "function",
   },
 ];
+
+export const resolveWagerAbi = [
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_wagerId",
+        type: "uint256",
+      },
+      {
+        internalType: "address[]",
+        name: "_winners",
+        type: "address[]",
+      },
+    ],
+    name: "resolveWager",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+];

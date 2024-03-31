@@ -13,6 +13,7 @@ import { useRouter } from "next/router";
 import { useAccount, useReadContracts } from "wagmi";
 import { getWagerAbi, isParticipantAbi } from "../../abi/weaveWager";
 import { useEffect, useState } from "react";
+import Countdown, { zeroPad } from "react-countdown";
 
 const dotenv = require("dotenv");
 
@@ -93,6 +94,23 @@ export default function WagerPage() {
     getMatch();
   }, [wager?.result.matchId, weaveDB, isParticipant?.result]);
 
+  const renderer = ({ hours, minutes, seconds, completed }) => {
+    return (
+      <span
+        className={cn(
+          " text-xl font-bold",
+          minutes === 0 && seconds <= 5
+            ? "text-red-800"
+            : minutes === 0 && seconds <= 30
+            ? "text-orange-600"
+            : "text-black"
+        )}
+      >
+        {zeroPad(hours)}:{zeroPad(minutes)}:{zeroPad(seconds)}
+      </span>
+    );
+  };
+
   if (isPending) return <div>Loading...</div>;
 
   if (error) return <div>Error: {error.shortMessage || error.message}</div>;
@@ -167,8 +185,8 @@ export default function WagerPage() {
           </div>
         </div>
 
-        <div className="text-center pt-5 pb-2">
-          <p className="text-xl">24 : 00 : 00</p>
+        <div className="flex items-center justify-center text-center pt-5 pb-2">
+          <Countdown date={match.match_timestamp * 1000} renderer={renderer} />
         </div>
       </div>
       <div className="flex justify-center items-center py-24">

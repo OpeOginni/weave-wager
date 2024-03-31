@@ -13,6 +13,9 @@
     },
     "match_date": {
       "type": "number"
+    },
+    "result": {
+      "type": "string"
     }
   }
 }

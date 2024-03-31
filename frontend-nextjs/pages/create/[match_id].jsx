@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import { useReadContract, useAccount } from "wagmi";
 import { useEffect, useState } from "react";
 import { hasCreatedMatchWagerAbi } from "../../abi/weaveWager";
+import Countdown, { zeroPad } from "react-countdown";
 
 export default function CreateWagerPage() {
   const router = useRouter();
@@ -53,6 +54,24 @@ export default function CreateWagerPage() {
 
     getMatch();
   }, [matchId, weaveDB, data?.result]);
+
+  const renderer = ({ hours, minutes, seconds, completed }) => {
+    return (
+      <span
+        className={cn(
+          " text-xl font-bold",
+          minutes === 0 && seconds <= 5
+            ? "text-red-800"
+            : minutes === 0 && seconds <= 30
+            ? "text-orange-600"
+            : "text-black"
+        )}
+      >
+        {zeroPad(hours)}:{zeroPad(minutes)}:{zeroPad(seconds)}
+      </span>
+    );
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <div className="flex flex-col border border-black rounded-xl mx-[15rem] my-7 py-14">
@@ -86,7 +105,10 @@ export default function CreateWagerPage() {
 
         <div className="text-center pt-5 pb-2">
           {match ? (
-            <p className="text-xl">{match.match_timestamp}</p>
+            <Countdown
+              date={match.match_timestamp * 1000}
+              renderer={renderer}
+            />
           ) : (
             // Render a loading message or spinner here
             <p>Loading...</p>
