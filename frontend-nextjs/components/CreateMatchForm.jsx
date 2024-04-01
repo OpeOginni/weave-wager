@@ -37,18 +37,22 @@ export default function CreateMatchForm() {
 
   async function onSubmit(values) {
     const createMatchDTO = {
-      match_id: values.match_id,
+      match_id: String(values.match_id),
       home_team: values.home_team,
       away_team: values.away_team,
       match_timestamp: values.match_timestamp,
     };
 
     try {
+      console.log(createMatchDTO);
+      const match = await db.weaveDB.get("matches", createMatchDTO.match_id);
+
+      if (match) return alert("Match_ID Exists");
+
       const wagerResult = await db.weaveDB.set(
         createMatchDTO,
-        "match",
-        `${createMatchDTO.match_id}`,
-        db.identity
+        "matches",
+        createMatchDTO.match_id
       );
 
       if (!wagerResult.success) throw new Error("Failed to create wager");

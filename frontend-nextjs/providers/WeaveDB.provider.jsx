@@ -13,17 +13,11 @@ export default function useWeaveDB() {
     async function init() {
       const db = new SDK({ contractTxId: CONTRACT_TX_ID, nocache: true });
       await db.init();
-      if (isConnected) {
-        const expiry = 60 * 60 * 24 * 7; // set expiry to a week
-        // Only create an identity WHEN wallet is connected
-        const { identity } = await db.createTempAddress(null, expiry);
-        setTempIdentity(identity);
-      }
       setWeaveDB(db);
     }
 
     init();
-  }, [isConnected]);
+  }, []);
 
   return { weaveDB, tempIdenity };
 }

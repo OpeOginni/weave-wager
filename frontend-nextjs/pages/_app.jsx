@@ -21,9 +21,9 @@ const config = getDefaultConfig({
       ? [arbitrumSepolia]
       : []),
   ],
-  // transports: {
-  //   [hardhat.id] : http("")
-  // }
+  transports: {
+    [hardhat.id]: http(""),
+  },
   ssr: true,
 });
 

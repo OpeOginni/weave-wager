@@ -1,11 +1,14 @@
 "use client";
 const z = require("zod");
+const dotenv = require("dotenv");
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Copy, Minus } from "lucide-react";
 import { useWeaveDBContext } from "../providers/WeaveDBContext";
 import { useRouter } from "next/router";
 import { useAccount } from "wagmi";
+import { parseEther, decodeEventLog } from "viem";
 
 import { Button } from "./ui/button";
 import {
@@ -18,6 +21,9 @@ import {
   FormMessage,
 } from "./ui/form";
 import { Input } from "./ui/input";
+import { config } from "../config/config";
+import { joinWagerAbi } from "../abi/weaveWager";
+import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 
 const wagerFormSchema = z.object({
   home: z
@@ -38,9 +44,14 @@ const wagerFormSchema = z.object({
     }),
 });
 
-export function WagerButton() {
+dotenv.config();
+
+const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
+export function WagerButton({ wager_stake }) {
   const router = useRouter();
-  const wagerId = router.query.id;
+  const { isPending, writeContractAsync } = useWriteContract();
+
+  const wagerId = router.query.wager_id;
   const { address } = useAccount();
   const db = useWeaveDBContext();
 
@@ -60,13 +71,18 @@ export function WagerButton() {
     };
     try {
       console.log(dto);
-      // TODO: Sign Prediction Transaction
+      await writeContractAsync({
+        address: CONTRACT_ADDRESS,
+        abi: joinWagerAbi,
+        functionName: "joinWager",
+        args: [BigInt(dto.wager_id)],
+        value: wager_stake,
+      });
 
       await db.weaveDB.set(
         dto,
         "predictions",
-        `${dto.wager_id}-${dto.user_address}`,
-        db.identity
+        `${dto.wager_id}-${dto.user_address}`
       );
 
       console.log("Prediction Created");

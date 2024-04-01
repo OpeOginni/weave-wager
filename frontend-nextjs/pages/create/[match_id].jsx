@@ -10,7 +10,7 @@ import { cn } from "../../lib/utils";
 
 export default function CreateWagerPage() {
   const router = useRouter();
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
 
   const [match, setMatch] = useState(null);
 
@@ -27,6 +27,7 @@ export default function CreateWagerPage() {
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
+    if (!isConnected) return router.push("/");
     async function getMatch() {
       if (db.weaveDB && isFetched) {
         console.log(data);
@@ -58,19 +59,23 @@ export default function CreateWagerPage() {
     getMatch();
   }, [matchId, db.weaveDB, data, isFetched]);
 
-  const renderer = ({ hours, minutes, seconds, completed }) => {
+  const renderer = ({ days, hours, minutes, seconds, completed }) => {
     return (
       <span
         className={cn(
-          "text-xl font-bold",
-          minutes === 0 && seconds <= 5
+          " text-xl font-bold",
+          days === 0 && hours === 0 && minutes === 0 && seconds <= 5
             ? "text-red-800"
-            : minutes === 0 && seconds <= 30
+            : days === 0 &&
+              hours === 0 &&
+              minutes === 0 &&
+              minutes === 0 &&
+              seconds <= 30
             ? "text-orange-600"
             : "text-black"
         )}
       >
-        {zeroPad(hours)}:{zeroPad(minutes)}:{zeroPad(seconds)}
+        {zeroPad(days)}:{zeroPad(hours)}:{zeroPad(minutes)}:{zeroPad(seconds)}
       </span>
     );
   };

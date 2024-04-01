@@ -763,3 +763,19 @@ export const resolveWagerAbi = [
     type: "function",
   },
 ];
+
+export const joinWagerAbi = [
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_wagerId",
+        type: "uint256",
+      },
+    ],
+    name: "joinWager",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+];

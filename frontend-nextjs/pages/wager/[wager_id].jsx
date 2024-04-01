@@ -15,7 +15,7 @@ import { getWagerAbi, isParticipantAbi } from "../../abi/weaveWager";
 import { useEffect, useState } from "react";
 import Countdown, { zeroPad } from "react-countdown";
 import { cn } from "../../lib/utils";
-
+import { parseEther, formatEther } from "viem";
 const dotenv = require("dotenv");
 
 dotenv.config();
@@ -23,7 +23,7 @@ const montserrat = Montserrat({ subsets: ["latin"] });
 
 export default function WagerPage() {
   const router = useRouter();
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
 
   const [match, setMatch] = useState(null);
   const [prediction, setPrediction] = useState(null);
@@ -75,7 +75,7 @@ export default function WagerPage() {
           setMatch(fecthedMatch[0]);
         }
 
-        if (db.weaveDB && isParticipant.result) {
+        if (db.weaveDB && isParticipant?.result) {
           console.log(`${Number(wager.result.id)}-${address}`);
           const fetchedPrediction = await db.weaveDB.get(
             "predictions",
@@ -95,19 +95,23 @@ export default function WagerPage() {
     getMatch();
   }, [wager?.result.matchId, db.weaveDB, isParticipant?.result]);
 
-  const renderer = ({ hours, minutes, seconds, completed }) => {
+  const renderer = ({ days, hours, minutes, seconds, completed }) => {
     return (
       <span
         className={cn(
           " text-xl font-bold",
-          minutes === 0 && seconds <= 5
+          days === 0 && hours === 0 && minutes === 0 && seconds <= 5
             ? "text-red-800"
-            : minutes === 0 && seconds <= 30
+            : days === 0 &&
+              hours === 0 &&
+              minutes === 0 &&
+              minutes === 0 &&
+              seconds <= 30
             ? "text-orange-600"
             : "text-black"
         )}
       >
-        {zeroPad(hours)}:{zeroPad(minutes)}:{zeroPad(seconds)}
+        {zeroPad(days)}:{zeroPad(hours)}:{zeroPad(minutes)}:{zeroPad(seconds)}
       </span>
     );
   };
@@ -116,6 +120,7 @@ export default function WagerPage() {
 
   if (error) return <div>Error: {error.shortMessage || error.message}</div>;
 
+  if (!isConnected) return <div>Connect Your Wallet To Join Wager</div>;
   return (
     <div className="flex flex-col min-h-screen">
       <div className="flex flex-col gap-3 text-center py-4 text-md">
@@ -125,7 +130,10 @@ export default function WagerPage() {
           No of Participants: {Number(wager.result.totalEntries)}
         </p>
       </div>
-      <div className="flex flex-col border border-black rounded-xl mx-[15rem] my-7 py-14">
+      <div className="flex flex-col text-center border border-black rounded-xl mx-[15rem] my-7 py-14">
+        <p className={cn(montserrat.className, "font-extrabold")}>
+          STAKE: {Number(formatEther(wager.result.stake))} ETH
+        </p>
         <div className="flex justify-between gap-6 items-center px-7 py-3">
           <div
             id="home-team"
@@ -169,7 +177,7 @@ export default function WagerPage() {
           </div>
 
           <p className="text-center font-extrabold text-purple-800">
-            Prediction
+            Your Prediction
           </p>
 
           <div
@@ -187,7 +195,15 @@ export default function WagerPage() {
         </div>
 
         <div className="flex items-center justify-center text-center pt-5 pb-2">
-          <Countdown date={match.match_timestamp * 1000} renderer={renderer} />
+          {match ? (
+            <Countdown
+              date={match.match_timestamp * 1000}
+              renderer={renderer}
+            />
+          ) : (
+            // Render a loading message or spinner here
+            <p>Loading...</p>
+          )}
         </div>
       </div>
       <div className="flex justify-center items-center py-24">
@@ -195,8 +211,10 @@ export default function WagerPage() {
           <ShareWagerButton wager_id={wagerId} />
         ) : isParticipant.result ? (
           <JoinedWagerButton />
+        ) : wager.result.stake ? (
+          <WagerButton wager_stake={wager.result.stake} />
         ) : (
-          <WagerButton />
+          <p>Loading...</p>
         )}
 
         {/* <ShareWagerButton /> */}

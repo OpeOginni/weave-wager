@@ -67,8 +67,6 @@ export default function CreateWagerForm({ match_timestamp }) {
 
     try {
       console.log(createWagerDTO);
-      // TODO: Sign Create Wager Transaction
-
       const result = await writeContractAsync({
         address: CONTRACT_ADDRESS,
         abi: createWagerAbi,
@@ -114,8 +112,7 @@ export default function CreateWagerForm({ match_timestamp }) {
       const wagerResult = await db.weaveDB.set(
         createWagerDTO,
         "wagers",
-        `${createWagerDTO.match_id}-${createWagerDTO.creator_address}`,
-        db.identity
+        `${createWagerDTO.match_id}-${createWagerDTO.creator_address}`
       );
 
       if (!wagerResult.success) throw new Error("Failed to create wager");
@@ -125,8 +122,7 @@ export default function CreateWagerForm({ match_timestamp }) {
       const predictionResult = await db.weaveDB.set(
         createPredictionDTO,
         "predictions",
-        `${createPredictionDTO.wager_id}-${createPredictionDTO.user_address}`,
-        db.identity
+        `${createPredictionDTO.wager_id}-${createPredictionDTO.user_address}`
       );
 
       if (!predictionResult.success) throw new Error("Failed to create wager");

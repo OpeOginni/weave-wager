@@ -21,7 +21,6 @@ import { updateMatchResultFormSchema } from "../types";
 dotenv.config();
 
 export default function UpdateMatchResultForm() {
-
   const db = useWeaveDBContext();
 
   const form = useForm({
@@ -34,7 +33,7 @@ export default function UpdateMatchResultForm() {
 
   async function onSubmit(values) {
     const updateMatchDTO = {
-      match_id: values.match_id,
+      match_id: String(values.match_id),
       result: values.result,
     };
 
