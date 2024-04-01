@@ -36,7 +36,7 @@ export default function CreateWagerForm({ match_timestamp }) {
   const router = useRouter();
   const matchId = router.query.match_id;
   const { address } = useAccount();
-  const weaveDB = useWeaveDBContext();
+  const db = useWeaveDBContext();
 
   const form = useForm({
     resolver: zodResolver(createWagerFormSchema),
@@ -111,20 +111,22 @@ export default function CreateWagerForm({ match_timestamp }) {
       console.log(createWagerDTO);
       console.log(createPredictionDTO);
 
-      const wagerResult = await weaveDB.set(
+      const wagerResult = await db.weaveDB.set(
         createWagerDTO,
         "wagers",
-        `${createWagerDTO.match_id}-${createWagerDTO.creator_address}`
+        `${createWagerDTO.match_id}-${createWagerDTO.creator_address}`,
+        db.identity
       );
 
       if (!wagerResult.success) throw new Error("Failed to create wager");
 
       console.log(createPredictionDTO);
 
-      const predictionResult = await weaveDB.set(
+      const predictionResult = await db.weaveDB.set(
         createPredictionDTO,
         "predictions",
-        `${createPredictionDTO.wager_id}-${createPredictionDTO.user_address}`
+        `${createPredictionDTO.wager_id}-${createPredictionDTO.user_address}`,
+        db.identity
       );
 
       if (!predictionResult.success) throw new Error("Failed to create wager");

@@ -1,19 +1,20 @@
-import SDK from "weavedb-sdk";
+import WeaveDB from "weavedb-sdk-node";
 
 const CONTRACT_TX_ID = process.env.NEXT_PUBLIC_CONTRACT_TX_ID;
 
 export default async function handler(req, res) {
-  if (req.method === "POST") {
+  if (req.method === "PATCH") {
     try {
-      const db = new SDK({ contractTxId: CONTRACT_TX_ID });
+      const db = new WeaveDB({ contractTxId: CONTRACT_TX_ID });
       await db.init();
+      const { identity } = await db.createTempAddress();
 
       const body = {
         match_id: req.body.match_id,
         result: req.body.result,
       };
 
-      await db.update({ result: body.result }, "matches", match_id);
+      await db.update({ result: body.result }, "matches", match_id, identity);
 
       res.status(200).json({ message: "Match Result Updated" });
     } catch (e) {

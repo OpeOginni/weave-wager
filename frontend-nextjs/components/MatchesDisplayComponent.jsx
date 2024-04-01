@@ -12,21 +12,21 @@ export default function MatchesDisplay() {
   const { openConnectModal } = useConnectModal();
   const { status } = useAccount();
 
-  const weaveDB = useWeaveDBContext();
+  const db = useWeaveDBContext();
 
   const [matches, setMatches] = useState(null);
 
   useEffect(() => {
     async function init() {
-      if (weaveDB) {
-        const fectedMatches = await weaveDB.get("matches");
+      if (db.weaveDB) {
+        const fectedMatches = await db.weaveDB.get("matches");
 
         setMatches(fectedMatches);
       }
     }
 
     init();
-  }, [weaveDB]);
+  }, [db.weaveDB]);
 
   const handleCreateWager = (matchId) => {
     if (status !== "connected") {

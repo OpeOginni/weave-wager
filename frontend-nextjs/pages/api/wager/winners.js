@@ -7,6 +7,9 @@ export default async function handler(req, res) {
     try {
       const db = new WeaveDB({ contractTxId: CONTRACT_TX_ID });
       await db.init();
+
+      const { identity } = await db.createTempAddress();
+
       const completedMatches = await db.get(
         "matches",
         ["result"],
@@ -37,7 +40,8 @@ export default async function handler(req, res) {
           await db.set(
             { wager_id: wager.wager_id, winners: wagerWinners },
             "winners",
-            wager.wager_id
+            wager.wager_id,
+            identity
           );
         }
       }

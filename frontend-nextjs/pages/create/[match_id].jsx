@@ -6,6 +6,7 @@ import { useReadContract, useAccount } from "wagmi";
 import { useEffect, useState } from "react";
 import { hasCreatedMatchWagerAbi } from "../../abi/weaveWager";
 import Countdown, { zeroPad } from "react-countdown";
+import { cn } from "../../lib/utils";
 
 export default function CreateWagerPage() {
   const router = useRouter();
@@ -14,9 +15,9 @@ export default function CreateWagerPage() {
   const [match, setMatch] = useState(null);
 
   const matchId = router.query.match_id;
-  const weaveDB = useWeaveDBContext();
+  const db = useWeaveDBContext();
 
-  const { data, isPending, error } = useReadContract({
+  const { data, isPending, error, isFetched } = useReadContract({
     address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
     abi: hasCreatedMatchWagerAbi,
     functionName: "hasCreatedMatchWager",
@@ -27,9 +28,11 @@ export default function CreateWagerPage() {
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     async function getMatch() {
-      if (weaveDB && data.result) {
-        if (data.result === true) {
-          const fetchedWager = await weaveDB.get(
+      if (db.weaveDB && isFetched) {
+        console.log(data);
+
+        if (data === true) {
+          const fetchedWager = await db.weaveDB.get(
             "wagers",
             `${matchId}-${address}`
           );
@@ -37,7 +40,7 @@ export default function CreateWagerPage() {
           return router.push(`/wager/${fetchedWager.wager_id}`);
         }
 
-        const fecthedMatch = await weaveDB.get(
+        const fecthedMatch = await db.weaveDB.get(
           "matches",
           ["match_id"],
           ["match_id", "==", router.query.match_id]
@@ -53,13 +56,13 @@ export default function CreateWagerPage() {
     }
 
     getMatch();
-  }, [matchId, weaveDB, data?.result]);
+  }, [matchId, db.weaveDB, data, isFetched]);
 
   const renderer = ({ hours, minutes, seconds, completed }) => {
     return (
       <span
         className={cn(
-          " text-xl font-bold",
+          "text-xl font-bold",
           minutes === 0 && seconds <= 5
             ? "text-red-800"
             : minutes === 0 && seconds <= 30
@@ -115,7 +118,7 @@ export default function CreateWagerPage() {
           )}
         </div>
       </div>
-      <div className="py-8 mx-[25rem]">
+      <div className="py-8 mx-[20rem]">
         {match ? (
           <CreateWagerForm match_timestamp={match.match_timestamp} />
         ) : (

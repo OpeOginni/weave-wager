@@ -4,12 +4,10 @@ import useWeaveDB from "./WeaveDB.provider";
 const WeaveDBContext = createContext(null);
 
 export const WeaveDBProvider = ({ children }) => {
-  const weaveDB = useWeaveDB();
+  const db = useWeaveDB();
 
   return (
-    <WeaveDBContext.Provider value={weaveDB}>
-      {children}
-    </WeaveDBContext.Provider>
+    <WeaveDBContext.Provider value={db}>{children}</WeaveDBContext.Provider>
   );
 };
 

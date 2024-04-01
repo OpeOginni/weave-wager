@@ -42,7 +42,7 @@ export function WagerButton() {
   const router = useRouter();
   const wagerId = router.query.id;
   const { address } = useAccount();
-  const weaveDB = useWeaveDBContext();
+  const db = useWeaveDBContext();
 
   const form = useForm({
     resolver: zodResolver(wagerFormSchema),
@@ -62,7 +62,12 @@ export function WagerButton() {
       console.log(dto);
       // TODO: Sign Prediction Transaction
 
-      await weaveDB.set(dto, "predictions");
+      await db.weaveDB.set(
+        dto,
+        "predictions",
+        `${dto.wager_id}-${dto.user_address}`,
+        db.identity
+      );
 
       console.log("Prediction Created");
     } catch (e) {

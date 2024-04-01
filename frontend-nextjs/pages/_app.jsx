@@ -13,7 +13,7 @@ dotenv.config();
 
 const config = getDefaultConfig({
   appName: "Weave Wager",
-  projectId: process.env.WALLET_CONNECT_ID,
+  projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_ID,
   chains: [
     // arbitrum,
     hardhat,

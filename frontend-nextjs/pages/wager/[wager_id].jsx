@@ -14,6 +14,7 @@ import { useAccount, useReadContracts } from "wagmi";
 import { getWagerAbi, isParticipantAbi } from "../../abi/weaveWager";
 import { useEffect, useState } from "react";
 import Countdown, { zeroPad } from "react-countdown";
+import { cn } from "../../lib/utils";
 
 const dotenv = require("dotenv");
 
@@ -28,7 +29,7 @@ export default function WagerPage() {
   const [prediction, setPrediction] = useState(null);
 
   const wagerId = router.query.wager_id;
-  const weaveDB = useWeaveDBContext();
+  const db = useWeaveDBContext();
 
   const { data, isPending, error } = useReadContracts({
     contracts: [
@@ -54,13 +55,13 @@ export default function WagerPage() {
   useEffect(() => {
     async function getMatch() {
       try {
-        if (weaveDB && wager) {
+        if (db.weaveDB && wager) {
           console.log(isParticipant);
           console.log("wager");
 
           console.log(wager);
 
-          const fecthedMatch = await weaveDB.get(
+          const fecthedMatch = await db.weaveDB.get(
             "matches",
             ["match_id"],
             ["match_id", "==", Number(wager.result.matchId).toString()]
@@ -74,9 +75,9 @@ export default function WagerPage() {
           setMatch(fecthedMatch[0]);
         }
 
-        if (weaveDB && isParticipant.result) {
+        if (db.weaveDB && isParticipant.result) {
           console.log(`${Number(wager.result.id)}-${address}`);
-          const fetchedPrediction = await weaveDB.get(
+          const fetchedPrediction = await db.weaveDB.get(
             "predictions",
             `${Number(wager.result.id)}-${address}`
           );
@@ -92,7 +93,7 @@ export default function WagerPage() {
     }
 
     getMatch();
-  }, [wager?.result.matchId, weaveDB, isParticipant?.result]);
+  }, [wager?.result.matchId, db.weaveDB, isParticipant?.result]);
 
   const renderer = ({ hours, minutes, seconds, completed }) => {
     return (
