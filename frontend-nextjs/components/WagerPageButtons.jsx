@@ -22,8 +22,10 @@ import {
 } from "./ui/form";
 import { Input } from "./ui/input";
 import { config } from "../config/config";
-import { joinWagerAbi } from "../abi/weaveWager";
+import { joinWagerAbi, resolveWagerAbi } from "../abi/weaveWager";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { useToast } from "./ui/use-toast";
+import { useState } from "react";
 
 const wagerFormSchema = z.object({
   home: z
@@ -49,7 +51,11 @@ dotenv.config();
 const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
 export function WagerButton({ wager_stake }) {
   const router = useRouter();
-  const { isPending, writeContractAsync } = useWriteContract();
+
+  const [isPending, setIsPending] = useState(false);
+  const { toast } = useToast();
+
+  const { writeContractAsync } = useWriteContract();
 
   const wagerId = router.query.wager_id;
   const { address } = useAccount();
@@ -70,7 +76,7 @@ export function WagerButton({ wager_stake }) {
       predicted_score: `${values.home}-${values.away}`,
     };
     try {
-      console.log(dto);
+      setIsPending(true);
       await writeContractAsync({
         address: CONTRACT_ADDRESS,
         abi: joinWagerAbi,
@@ -84,9 +90,17 @@ export function WagerButton({ wager_stake }) {
         "predictions",
         `${dto.wager_id}-${dto.user_address}`
       );
-
-      console.log("Prediction Created");
+      setIsPending(false);
+      toast({
+        title: "Prediction Created",
+      });
     } catch (e) {
+      setIsPending(false);
+      toast({
+        title: "Error",
+        variant: "destructive",
+        description: e.message,
+      });
       console.log(e);
     }
   }
@@ -140,13 +154,90 @@ export function WagerButton({ wager_stake }) {
           />
         </div>
 
-        <Button className="border">WAGER</Button>
+        <Button disabled={isPending} className="border">
+          {isPending ? "Placing Wager..." : "Wager"}
+        </Button>
       </form>
     </Form>
   );
 }
 
+export function ResolveWagerButton({ wager_id }) {
+  const [isPending, setIsPending] = useState(false);
+  const db = useWeaveDBContext();
+
+  async function resolveWager() {
+    try {
+      setIsPending(true);
+
+      const wagers = await db.get(
+        "wagers",
+        ["wager_id"],
+        ["wager_id", "==", wager_id]
+      );
+
+      const wager = wagers[0];
+
+      const match = await db.get("matches", wager.match_id);
+
+      if (match.winners_choosen)
+        throw new Error("Winners have been choosen already");
+
+      const wagerPredictions = await db.get(
+        "predictions",
+        ["wager_id"],
+        ["wager_id", "==", wager.wager_id]
+      );
+
+      const wagerWinners = [];
+
+      for (const prediction of wagerPredictions) {
+        if (prediction.predicted_score === match.result) {
+          wagerWinners.push(prediction.user_address);
+        }
+      }
+
+      await db.set(
+        { wager_id: wager.wager_id, winners: wagerWinners },
+        "winners",
+        wager.wager_id
+      );
+      await writeContractAsync({
+        address: CONTRACT_ADDRESS,
+        abi: resolveWagerAbi,
+        functionName: "resolveWager",
+        args: [BigInt(wager_id), wagerWinners],
+      });
+
+      setIsPending(false);
+      toast({
+        title: "Wager Resolved",
+      });
+    } catch (e) {
+      setIsPending(false);
+      toast({
+        title: "Error",
+        variant: "destructive",
+        description: e.message,
+      });
+      console.log(e);
+    }
+  }
+
+  return (
+    <Button
+      disabled={isPending}
+      className="border"
+      onClick={() => resolveWager()}
+    >
+      {isPending ? "Resolving Wager" : "Resolve Wager"}
+    </Button>
+  );
+}
+
 export function ShareWagerButton({ wager_id }) {
+  const { toast } = useToast();
+
   return (
     <Button
       className="flex flex-row gap-2 border"
@@ -154,6 +245,10 @@ export function ShareWagerButton({ wager_id }) {
         navigator.clipboard.writeText(
           `http://localhost:3000/wager/${wager_id}`
         );
+
+        toast({
+          title: "Wager Link Copied",
+        });
       }}
     >
       SHARE WAGER <Copy />

@@ -6,8 +6,7 @@ const z = require("zod");
 const dotenv = require("dotenv");
 
 import { useWeaveDBContext } from "../providers/WeaveDBContext";
-import { useRouter } from "next/router";
-import { useAccount } from "wagmi";
+import { useToast } from "./ui/use-toast";
 import { Button } from "./ui/button";
 import {
   Form,
@@ -19,11 +18,14 @@ import {
 } from "./ui/form";
 import { Input } from "./ui/input";
 import { createMatchFormSchema } from "../types";
+import { useState } from "react";
 
 dotenv.config();
 
 export default function CreateMatchForm() {
   const db = useWeaveDBContext();
+  const [isPending, setIsPending] = useState();
+  const { toast } = useToast();
 
   const form = useForm({
     resolver: zodResolver(createMatchFormSchema),
@@ -41,13 +43,14 @@ export default function CreateMatchForm() {
       home_team: values.home_team,
       away_team: values.away_team,
       match_timestamp: values.match_timestamp,
+      status: "ONGOING",
     };
 
     try {
-      console.log(createMatchDTO);
+      setIsPending(true);
       const match = await db.weaveDB.get("matches", createMatchDTO.match_id);
 
-      if (match) return alert("Match_ID Exists");
+      if (match) throw new Error("Match ID Exist");
 
       const wagerResult = await db.weaveDB.set(
         createMatchDTO,
@@ -57,9 +60,17 @@ export default function CreateMatchForm() {
 
       if (!wagerResult.success) throw new Error("Failed to create wager");
 
-      alert("Match Created");
+      setIsPending(false);
+      toast({
+        title: "Match Created",
+      });
     } catch (e) {
-      console.log("ERROR 2");
+      setIsPending(false);
+      toast({
+        title: "Error",
+        variant: "destructive",
+        description: e.message,
+      });
       return console.log(e);
     }
   }
@@ -122,8 +133,8 @@ export default function CreateMatchForm() {
           )}
         />
 
-        <Button className="border" type="submit">
-          Create Match
+        <Button disabled={isPending} className="border" type="submit">
+          {isPending ? "Creating Match..." : "Create Match"}
         </Button>
       </form>
     </Form>

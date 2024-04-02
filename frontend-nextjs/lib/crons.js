@@ -1,9 +1,9 @@
 export const weaveDBCron = (matchweek_start, matchweek_end, interval) => {
   return {
-    start: matchweek_start,
-    end: matchweek_end,
-    span: interval,
-    do: false,
+    start: Date.now() / 1000,
+    end: (Date.now() + 1000 * 60 * 60 * 4) / 1000, // 4 hours
+    span: (Date.now() + 1000 * 60 * 30) / 1000, // 30 mins,
+    do: true,
     times: 1,
     jobs: [
       [

@@ -5,11 +5,9 @@ import { useForm } from "react-hook-form";
 const z = require("zod");
 const dotenv = require("dotenv");
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { waitForTransactionReceipt } from "wagmi/actions";
-import { parseEther, decodeEventLog } from "viem";
 import { useWeaveDBContext } from "../providers/WeaveDBContext";
-import { useRouter } from "next/router";
-import { useAccount } from "wagmi";
+import { useToast } from "./ui/use-toast";
+
 import { Button } from "./ui/button";
 import {
   Form,
@@ -22,6 +20,7 @@ import {
 import { Input } from "./ui/input";
 import { resolveWagerFormSchema } from "../types";
 import { resolveWagerAbi } from "../abi/weaveWager";
+import { useState } from "react";
 
 dotenv.config();
 
@@ -29,6 +28,8 @@ const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
 
 export default function ResolveWagerForm() {
   const { writeContractAsync } = useWriteContract();
+  const [isPending, setIsPending] = useState(false);
+  const { toast } = useToast();
 
   const db = useWeaveDBContext();
 
@@ -41,6 +42,7 @@ export default function ResolveWagerForm() {
 
   async function onSubmit(values) {
     try {
+      setIsPending(true);
       const prediction = await db.weaveDB.get(
         "predictions",
         `${values.wager_id}`
@@ -55,9 +57,17 @@ export default function ResolveWagerForm() {
 
       if (!result) throw new Error("Failed to Resolve Wager");
 
-      alert("Wager Resolved");
+      setIsPending(false);
+      toast({
+        title: "Wager Resolved",
+      });
     } catch (e) {
-      console.log("ERROR 2");
+      setIsPending(false);
+      toast({
+        title: "Error",
+        variant: "destructive",
+        description: e.message,
+      });
       return console.log(e);
     }
   }
@@ -79,8 +89,8 @@ export default function ResolveWagerForm() {
           )}
         />
 
-        <Button className="border" type="submit">
-          Resolve Completed Wagers
+        <Button disabled={isPending} className="border" type="submit">
+          {isPending ? "Resolveing Wagers..." : "Resolve Completed Wagers"}
         </Button>
       </form>
     </Form>

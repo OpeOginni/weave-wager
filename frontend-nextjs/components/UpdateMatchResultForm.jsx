@@ -6,6 +6,7 @@ const dotenv = require("dotenv");
 
 import { useWeaveDBContext } from "../providers/WeaveDBContext";
 import { useRouter } from "next/router";
+import { useToast } from "./ui/use-toast";
 import { Button } from "./ui/button";
 import {
   Form,
@@ -17,11 +18,14 @@ import {
 } from "./ui/form";
 import { Input } from "./ui/input";
 import { updateMatchResultFormSchema } from "../types";
+import { useState } from "react";
 
 dotenv.config();
 
 export default function UpdateMatchResultForm() {
   const db = useWeaveDBContext();
+  const [isPending, setIsPending] = useState();
+  const { toast } = useToast();
 
   const form = useForm({
     resolver: zodResolver(updateMatchResultFormSchema),
@@ -38,18 +42,28 @@ export default function UpdateMatchResultForm() {
     };
 
     try {
+      setIsPending(true);
+
       const wagerResult = await db.weaveDB.update(
-        { result: updateMatchDTO.result },
-        "match",
-        `${updateMatchDTO.match_id}`,
-        db.identity
+        { result: updateMatchDTO.result, status: "COMPLETED" },
+        "matches",
+        `${updateMatchDTO.match_id}`
       );
 
       if (!wagerResult.success) throw new Error("Failed to Update Match");
 
-      alert("Match Updated");
+      toast({
+        title: "Match Updated",
+      });
+      setIsPending(false);
     } catch (e) {
-      console.log("ERROR 2");
+      setIsPending(false);
+
+      toast({
+        title: "Error",
+        variant: "destructive",
+        description: e.message,
+      });
       return console.log(e);
     }
   }
@@ -85,8 +99,8 @@ export default function UpdateMatchResultForm() {
           )}
         />
 
-        <Button className="border" type="submit">
-          Update Match
+        <Button disabled={isPending} className="border" type="submit">
+          {isPending ? "Updating Match..." : "Update Match"}
         </Button>
       </form>
     </Form>

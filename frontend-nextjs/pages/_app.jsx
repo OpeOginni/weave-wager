@@ -8,6 +8,7 @@ import { arbitrum, arbitrumSepolia, hardhat } from "wagmi/chains";
 import { getDefaultConfig, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { WeaveDBProvider } from "../providers/WeaveDBContext";
 import HeaderComponent from "../components/HeaderComponent";
+import { Toaster } from "../components/ui/toaster";
 
 dotenv.config();
 
@@ -37,6 +38,7 @@ function MyApp({ Component, pageProps }) {
           <WeaveDBProvider>
             <HeaderComponent />
             <Component {...pageProps} />
+            <Toaster />
           </WeaveDBProvider>
         </RainbowKitProvider>
       </QueryClientProvider>

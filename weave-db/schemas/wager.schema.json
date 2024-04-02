@@ -1,6 +1,14 @@
 {
   "type": "object",
-  "required": ["wager_id", "creator_address", "match_id", "stake_amount", "max_participants", "created_at"],
+  "required": [
+    "wager_id",
+    "creator_address",
+    "match_id",
+    "stake_amount",
+    "max_participants",
+    "created_at",
+    "winners_choosen"
+  ],
   "properties": {
     "wager_id": {
       "type": "string"
@@ -19,6 +27,9 @@
     },
     "created_at": {
       "type": "number"
+    },
+    "winners_choosen": {
+      "type": "boolean"
     }
   }
 }

@@ -2,9 +2,7 @@ import {
   WagerButton,
   ShareWagerButton,
   JoinedWagerButton,
-  YouWonButton,
-  YouLostButton,
-  DrawButton,
+  ResolveWagerButton,
 } from "../../components/WagerPageButtons";
 import { Minus } from "lucide-react";
 import { useWeaveDBContext } from "../../providers/WeaveDBContext";
@@ -16,6 +14,10 @@ import { useEffect, useState } from "react";
 import Countdown, { zeroPad } from "react-countdown";
 import { cn } from "../../lib/utils";
 import { parseEther, formatEther } from "viem";
+import WagerResultComponent from "../../components/WagerResultComponent";
+
+import { Skeleton } from "../../components/ui/skeleton";
+
 const dotenv = require("dotenv");
 
 dotenv.config();
@@ -27,6 +29,7 @@ export default function WagerPage() {
 
   const [match, setMatch] = useState(null);
   const [prediction, setPrediction] = useState(null);
+  const [isFetchingPrediction, setIsFetchingPrediction] = useState(false);
 
   const wagerId = router.query.wager_id;
   const db = useWeaveDBContext();
@@ -55,6 +58,7 @@ export default function WagerPage() {
   useEffect(() => {
     async function getMatch() {
       try {
+        setIsFetchingPrediction(true);
         if (db.weaveDB && wager) {
           console.log(isParticipant);
           console.log("wager");
@@ -86,6 +90,7 @@ export default function WagerPage() {
           console.log(fetchedPrediction);
 
           setPrediction(fetchedPrediction);
+          setIsFetchingPrediction(false);
         }
       } catch (e) {
         console.log(e);
@@ -116,6 +121,20 @@ export default function WagerPage() {
     );
   };
 
+  let button;
+
+  if (match?.match_timestamp * 1000 < Date.now()) {
+    button = <p>Match has ended</p>;
+  } else if (wager?.result.creator === address) {
+    button = <ShareWagerButton wager_id={wagerId} />;
+  } else if (isParticipant?.result) {
+    button = <JoinedWagerButton />;
+  } else if (wager?.result.stake) {
+    button = <WagerButton wager_stake={wager.result.stake} />;
+  } else {
+    button = <p>Loading...</p>;
+  }
+
   if (isPending) return <div>Loading...</div>;
 
   if (error) return <div>Error: {error.shortMessage || error.message}</div>;
@@ -143,7 +162,7 @@ export default function WagerPage() {
               <p className="text-2xl font-bold">{match.home_team}</p>
             ) : (
               // Render a loading message or spinner here
-              <p>Loading...</p>
+              <Skeleton className="h-[50px] w-[100px] bg-gray-300" />
             )}
           </div>
 
@@ -157,7 +176,7 @@ export default function WagerPage() {
               <p className="text-2xl font-bold">{match.away_team}</p>
             ) : (
               // Render a loading message or spinner here
-              <p>Loading...</p>
+              <Skeleton className="h-[50px] w-[100px] bg-gray-300" />
             )}
           </div>
         </div>
@@ -167,10 +186,14 @@ export default function WagerPage() {
             id="home-team-prediction"
             className="border rounded-xl text-center px-5 py-3"
           >
-            {prediction ? (
-              <p className="text-xl font-bold">
-                {prediction.predicted_score.split("-")[0]}
-              </p>
+            {isParticipant?.result ? (
+              prediction ? (
+                <p className="text-xl font-bold">
+                  {prediction.predicted_score.split("-")[0]}
+                </p>
+              ) : (
+                <Skeleton className="h-[28px] w-[13px] bg-gray-300" />
+              )
             ) : (
               <p className="text-xl font-bold">--</p>
             )}
@@ -184,13 +207,17 @@ export default function WagerPage() {
             id="away-team-prediction"
             className="border rounded-xl text-center px-5 py-3"
           >
-            {prediction ? (
-              <p className="text-xl font-bold">
-                {prediction.predicted_score.split("-")[1]}
-              </p>
+            {isParticipant?.result ? (
+              prediction ? (
+                <p className="text-xl font-bold">
+                  {prediction.predicted_score.split("-")[1]}
+                </p>
+              ) : (
+                <Skeleton className="h-[28px] w-[13px] bg-gray-300" />
+              )
             ) : (
               <p className="text-xl font-bold">--</p>
-            )}{" "}
+            )}
           </div>
         </div>
 
@@ -206,21 +233,18 @@ export default function WagerPage() {
           )}
         </div>
       </div>
-      <div className="flex justify-center items-center py-24">
-        {wager.result.creator === address ? (
-          <ShareWagerButton wager_id={wagerId} />
-        ) : isParticipant.result ? (
-          <JoinedWagerButton />
-        ) : wager.result.stake ? (
-          <WagerButton wager_stake={wager.result.stake} />
-        ) : (
-          <p>Loading...</p>
-        )}
+      <div className="flex flex-col gap-3 justify-center items-center py-24">
+        {match?.status === "COMPLETED" &&
+        !match.resolved &&
+        wager.result.winners_choosen ? (
+          <ResolveWagerButton />
+        ) : null}
 
-        {/* <ShareWagerButton /> */}
-        {/* <YouWonButton /> */}
-        {/* <YouLostButton /> */}
-        {/* <DrawButton /> */}
+        {match?.status === "COMPLETED" ? (
+          <WagerResultComponent wager_id={wagerId} />
+        ) : (
+          <div>{button}</div>
+        )}
       </div>
     </div>
   );

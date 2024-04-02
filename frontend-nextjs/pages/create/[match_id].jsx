@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { hasCreatedMatchWagerAbi } from "../../abi/weaveWager";
 import Countdown, { zeroPad } from "react-countdown";
 import { cn } from "../../lib/utils";
+import { Skeleton } from "../../components/ui/skeleton";
 
 export default function CreateWagerPage() {
   const router = useRouter();
@@ -92,7 +93,7 @@ export default function CreateWagerPage() {
               <p className="text-2xl font-bold">{match.home_team}</p>
             ) : (
               // Render a loading message or spinner here
-              <p>Loading...</p>
+              <Skeleton className="h-[50px] w-[100px] bg-gray-300" />
             )}
           </div>
 
@@ -106,12 +107,12 @@ export default function CreateWagerPage() {
               <p className="text-2xl font-bold">{match.away_team}</p>
             ) : (
               // Render a loading message or spinner here
-              <p>Loading...</p>
+              <Skeleton className="h-[50px] w-[100px] bg-gray-300" />
             )}
           </div>
         </div>
 
-        <div className="text-center pt-5 pb-2">
+        <div className="flex justify-center items-center text-center pt-5 pb-2">
           {match ? (
             <Countdown
               date={match.match_timestamp * 1000}
@@ -119,16 +120,16 @@ export default function CreateWagerPage() {
             />
           ) : (
             // Render a loading message or spinner here
-            <p>Loading...</p>
+            <Skeleton className="h-[50px] w-[150px] bg-gray-300" />
           )}
         </div>
       </div>
-      <div className="py-8 mx-[20rem]">
+      <div className=" py-8 mx-[20rem]">
         {match ? (
           <CreateWagerForm match_timestamp={match.match_timestamp} />
         ) : (
           // Render a loading message or spinner here
-          <p>Loading...</p>
+          <p className="text-center">Loading...</p>
         )}
       </div>
     </div>

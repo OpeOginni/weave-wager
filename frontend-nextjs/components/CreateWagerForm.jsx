@@ -4,12 +4,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 const z = require("zod");
 const dotenv = require("dotenv");
-import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { useWriteContract } from "wagmi";
 import { waitForTransactionReceipt } from "wagmi/actions";
 import { parseEther, decodeEventLog } from "viem";
 import { useWeaveDBContext } from "../providers/WeaveDBContext";
 import { useRouter } from "next/router";
 import { useAccount } from "wagmi";
+import { useToast } from "./ui/use-toast";
+
 import { Minus } from "lucide-react";
 import { Button } from "./ui/button";
 import {
@@ -25,13 +27,16 @@ import { Input } from "./ui/input";
 import { createWagerFormSchema } from "../types";
 import { abi, createWagerAbi, createdWagerEventAbi } from "../abi/weaveWager";
 import { config } from "../config/config";
+import { useState } from "react";
 
 dotenv.config();
 
 const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
 
 export default function CreateWagerForm({ match_timestamp }) {
-  const { isPending, writeContractAsync } = useWriteContract();
+  const { writeContractAsync } = useWriteContract();
+  const [isPending, setIsPending] = useState();
+  const { toast } = useToast();
 
   const router = useRouter();
   const matchId = router.query.match_id;
@@ -57,6 +62,7 @@ export default function CreateWagerForm({ match_timestamp }) {
       created_at: Date.now(),
       creator_address: address,
       match_timestamp: match_timestamp,
+      winners_choosen: false,
     };
 
     const createPredictionDTO = {
@@ -66,7 +72,7 @@ export default function CreateWagerForm({ match_timestamp }) {
     };
 
     try {
-      console.log(createWagerDTO);
+      setIsPending(true);
       const result = await writeContractAsync({
         address: CONTRACT_ADDRESS,
         abi: createWagerAbi,
@@ -80,15 +86,7 @@ export default function CreateWagerForm({ match_timestamp }) {
         value: parseEther(createWagerDTO.stake_amount.toString()),
       });
 
-      console.log("Result");
-      console.log(result);
-
       const reciept = await waitForTransactionReceipt(config, { hash: result });
-
-      // Help me to loop through the logs object in reciept
-
-      console.log("reciept");
-      console.log(reciept);
 
       const createdWagerEvent = decodeEventLog({
         abi: createdWagerEventAbi,
@@ -96,18 +94,12 @@ export default function CreateWagerForm({ match_timestamp }) {
         topics: reciept.logs[0].topics,
       });
 
-      console.log("createdWagerEvent");
-      console.log(createdWagerEvent);
-
       createWagerDTO.wager_id = Number(
         createdWagerEvent.args.wagerId
       ).toString();
       createPredictionDTO.wager_id = Number(
         createdWagerEvent.args.wagerId
       ).toString();
-
-      console.log(createWagerDTO);
-      console.log(createPredictionDTO);
 
       const wagerResult = await db.weaveDB.set(
         createWagerDTO,
@@ -117,7 +109,8 @@ export default function CreateWagerForm({ match_timestamp }) {
 
       if (!wagerResult.success) throw new Error("Failed to create wager");
 
-      console.log(createPredictionDTO);
+      // Wait for 2 seconds to give both singing different Nonces and prevent Error
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const predictionResult = await db.weaveDB.set(
         createPredictionDTO,
@@ -127,11 +120,18 @@ export default function CreateWagerForm({ match_timestamp }) {
 
       if (!predictionResult.success) throw new Error("Failed to create wager");
 
-      console.log("Prediction Created");
-
+      setIsPending(false);
+      toast({
+        title: "Wager Created",
+      });
       router.push(`/wager/${createWagerDTO.wager_id}`);
     } catch (e) {
-      console.log("ERROR 2");
+      setIsPending(false);
+      toast({
+        title: "Error",
+        variant: "destructive",
+        description: e.message,
+      });
       return console.log(e);
     }
   }
@@ -212,8 +212,8 @@ export default function CreateWagerForm({ match_timestamp }) {
             )}
           />
         </div>
-        <Button className="border" type="submit">
-          Create Wager
+        <Button disabled={isPending} className="border" type="submit">
+          {isPending ? "Creating Wager..." : "Create Wager"}
         </Button>
       </form>
     </Form>

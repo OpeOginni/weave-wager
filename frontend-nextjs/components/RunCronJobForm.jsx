@@ -4,12 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 const z = require("zod");
 const dotenv = require("dotenv");
-import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { waitForTransactionReceipt } from "wagmi/actions";
-import { parseEther, decodeEventLog } from "viem";
 import { useWeaveDBContext } from "../providers/WeaveDBContext";
-import { useRouter } from "next/router";
-import { useAccount } from "wagmi";
 import { Button } from "./ui/button";
 import {
   Form,
@@ -21,21 +16,16 @@ import {
 } from "./ui/form";
 import { Input } from "./ui/input";
 import { runCronJobFormSchema } from "../types";
-import { abi, createWagerAbi, createdWagerEventAbi } from "../abi/weaveWager";
-import { config } from "../config/config";
 import { weaveDBCron } from "../lib/crons";
+import { useToast } from "./ui/use-toast";
+import { useState } from "react";
 
 dotenv.config();
 
-const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
-
 export default function RunCronJobForm() {
-  const { isPending, writeContractAsync } = useWriteContract();
-
-  const router = useRouter();
-  const matchId = router.query.match_id;
-  const { address } = useAccount();
+  const [isPending, setIsPending] = useState(false);
   const db = useWeaveDBContext();
+  const { toast } = useToast();
 
   const form = useForm({
     resolver: zodResolver(runCronJobFormSchema),
@@ -54,6 +44,7 @@ export default function RunCronJobForm() {
     };
 
     try {
+      setIsPending(true);
       const cronJob = weaveDBCron(
         runCronJobDTO.matchweek_start,
         runCronJobDTO.matchweek_end,
@@ -62,9 +53,20 @@ export default function RunCronJobForm() {
 
       await db.weaveDB.addCron(cronJob, "get-winners-cron");
 
-      alert("Cron Added");
+      setIsPending(false);
+
+      toast({
+        title: "Cron Added",
+      });
     } catch (e) {
-      console.log("ERROR 2");
+      setIsPending(false);
+
+      toast({
+        title: "Error",
+        variant: "destructive",
+        description: e.message,
+      });
+
       return console.log(e);
     }
   }
@@ -114,8 +116,8 @@ export default function RunCronJobForm() {
           )}
         />
 
-        <Button className="border" type="submit">
-          Run Winner Cron
+        <Button disabled={isPending} className="border" type="submit">
+          {isPending ? "Creating Cron..." : "Run Winner Cron"}
         </Button>
       </form>
     </Form>

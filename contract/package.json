@@ -4,9 +4,9 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "weaveWager:deploy:localhost": "npx hardhat ignition deploy ignition/modules/weaveWager.ts --network localhost",
-    "weaveWager:deploy:testnet": "npx hardhat ignition deploy ignition/modules/weaveWager.ts --network arbitrumSepolia --deployment-id testnet-deployment",
-    "weaveWager:deploy:mainnet": "npx hardhat ignition deploy ignition/modules/weaveWager.ts --network arbitrumOne --deployment-id mainnet-deployment",
+    "weaveWager:deploy:localhost": "npx hardhat ignition deploy ignition/modules/WeaveWager.ts --network localhost",
+    "weaveWager:deploy:testnet": "npx hardhat ignition deploy ignition/modules/WeaveWager.ts --network arbitrumSepolia --deployment-id testnet-deployment",
+    "weaveWager:deploy:mainnet": "npx hardhat ignition deploy ignition/modules/WeaveWager.ts --network arbitrumOne --deployment-id mainnet-deployment",
     "weaveWager:verify:testnet": "npx hardhat ignition verify testnet-deployment",
     "weaveWager:verify:mainnet": "npx hardhat ignition verify mainnet-deployment",
     "weaveWager:test": "npx hardhat test test/Wager.ts",

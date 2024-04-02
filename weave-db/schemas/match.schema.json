@@ -1,6 +1,6 @@
 {
   "type": "object",
-  "required": ["match_id", "home_team", "away_team", "match_date"],
+  "required": ["match_id", "home_team", "away_team", "match_timestamp"],
   "properties": {
     "match_id": {
       "type": "string"
@@ -11,10 +11,13 @@
     "away_team": {
       "type": "string"
     },
-    "match_date": {
+    "match_timestamp": {
       "type": "number"
     },
     "result": {
+      "type": "string"
+    },
+    "status": {
       "type": "string"
     }
   }

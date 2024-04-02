@@ -135,11 +135,12 @@ contract WeaveWager {
         emit WagerCancled(_wagerId, msg.sender);
     }
 
-    function resolveWager(uint256 _wagerId, address[] calldata _winners) external onlyOwner {
+    function resolveWager(uint256 _wagerId, address[] calldata _winners) external {
         Wager memory wager = getWager(_wagerId);
         require(!wagerResolved[_wagerId], 'Wager has been resolved');
         require(_winners.length <= wager.totalEntries, 'Winners Array Is Bigger than Wager Entries');
         require(wager.matchStartTimestamp < block.timestamp, "Can't Resolve Wager, Match Havn't Started");
+        require(isParticipant(_wagerId, msg.sender), 'Address is not a participant');
 
         wagerResolved[_wagerId] = true;
         wager.resolved = true;

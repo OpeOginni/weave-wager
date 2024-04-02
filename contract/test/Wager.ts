@@ -85,7 +85,7 @@ describe('Wager Contract', () => {
         value: TEN_ETH,
       });
 
-      const creatorAddress = await weaveWager.gameCreators(1);
+      const creatorAddress = await weaveWager.wagerCreator(1);
 
       expect(creatorAddress).to.be.equal(deployer.address);
     });
@@ -192,10 +192,12 @@ describe('Wager Contract', () => {
   });
 
   describe('resolving wager', () => {
-    it('should revert when called by an address that isnt the deployer address', async () => {
-      const { weaveWager, user1, user2, TEN_ETH, WAGER_ID } = await loadFixture(completeWagerFixture);
+    it('should revert when called by an address that isnt a participant', async () => {
+      const { weaveWager, user2, nonParticipant, WAGER_ID, MATCH_START_TIME } = await loadFixture(completeWagerFixture);
 
-      await expect(weaveWager.connect(user1).resolveWager(WAGER_ID, [user2.address])).to.revertedWith('Function can Only be called by owner');
+      await time.increaseTo(MATCH_START_TIME);
+
+      await expect(weaveWager.connect(nonParticipant).resolveWager(WAGER_ID, [user2.address])).to.revertedWith('Address is not a participant');
     });
 
     it('should revert if the wager is being resolved before the match starts', async () => {
