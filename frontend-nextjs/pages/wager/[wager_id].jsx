@@ -234,12 +234,12 @@ export default function WagerPage() {
         </div>
       </div>
       <div className="flex flex-col gap-3 justify-center items-center py-24">
-        {match?.status === "COMPLETED" &&
+        {/* {match?.status === "COMPLETED" &&
         !match.resolved &&
         wager.result.winners_choosen ? (
           <ResolveWagerButton />
-        ) : null}
-
+        ) : null} */}
+        {!wager.resolved ? <ResolveWagerButton wager_id={wagerId} /> : null}
         {match?.status === "COMPLETED" ? (
           <WagerResultComponent wager_id={wagerId} />
         ) : (

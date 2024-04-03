@@ -14,6 +14,7 @@ export default function CreateWagerPage() {
   const { address, isConnected } = useAccount();
 
   const [match, setMatch] = useState(null);
+  const [identity, setIdentity] = useState(null);
 
   const matchId = router.query.match_id;
   const db = useWeaveDBContext();
@@ -26,12 +27,19 @@ export default function CreateWagerPage() {
     query: { enabled: !!matchId },
   });
 
+  // useEffect(() => {
+
+  // })
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     if (!isConnected) return router.push("/");
     async function getMatch() {
       if (db.weaveDB && isFetched) {
         console.log(data);
+
+        // const { identity: _identity } = await db.weaveDB.createTempAddress();
+
+        // setIdentity(_identity);
 
         if (data === true) {
           const fetchedWager = await db.weaveDB.get(
@@ -126,7 +134,10 @@ export default function CreateWagerPage() {
       </div>
       <div className=" py-8 mx-[20rem]">
         {match ? (
-          <CreateWagerForm match_timestamp={match.match_timestamp} />
+          <CreateWagerForm
+            match_timestamp={match.match_timestamp}
+            identity={identity}
+          />
         ) : (
           // Render a loading message or spinner here
           <p className="text-center">Loading...</p>

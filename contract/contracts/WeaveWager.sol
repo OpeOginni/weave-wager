@@ -125,8 +125,7 @@ contract WeaveWager {
         address creator = payable(wager.creator);
         uint256 stake = wager.stake;
 
-        wager.resolved = true;
-        wagerResolved[_wagerId] = true;
+        updateWagerResolvedStatus(_wagerId);
 
         (bool sent, bytes memory data) = creator.call{value: stake}('');
 
@@ -142,8 +141,7 @@ contract WeaveWager {
         require(wager.matchStartTimestamp < block.timestamp, "Can't Resolve Wager, Match Havn't Started");
         require(isParticipant(_wagerId, msg.sender), 'Address is not a participant');
 
-        wagerResolved[_wagerId] = true;
-        wager.resolved = true;
+        updateWagerResolvedStatus(_wagerId);
 
         uint256 totalWinners = _winners.length;
         uint256 totalStake = wager.totalStaked;
@@ -204,6 +202,11 @@ contract WeaveWager {
 
     function increaseWagerTotalStake(uint256 _wagerId) private {
         wagers[_wagerId].totalStaked = wagers[_wagerId].totalStaked + wagers[_wagerId].stake;
+    }
+
+    function updateWagerResolvedStatus(uint256 _wagerId) private {
+        wagerResolved[_wagerId] = true;
+        wagers[_wagerId].resolved = true;
     }
 
     modifier onlyOwner() {

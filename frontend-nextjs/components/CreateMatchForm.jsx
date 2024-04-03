@@ -52,13 +52,14 @@ export default function CreateMatchForm() {
 
       if (match) throw new Error("Match ID Exist");
 
-      const wagerResult = await db.weaveDB.set(
+      const matchResult = await db.weaveDB.set(
         createMatchDTO,
         "matches",
-        createMatchDTO.match_id
+        createMatchDTO.match_id,
+        db.tempIdentity
       );
 
-      if (!wagerResult.success) throw new Error("Failed to create wager");
+      if (!matchResult.success) throw new Error("Failed to create wager");
 
       setIsPending(false);
       toast({

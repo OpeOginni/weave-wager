@@ -33,7 +33,7 @@ dotenv.config();
 
 const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
 
-export default function CreateWagerForm({ match_timestamp }) {
+export default function CreateWagerForm({ match_timestamp, identity }) {
   const { writeContractAsync } = useWriteContract();
   const [isPending, setIsPending] = useState();
   const { toast } = useToast();
@@ -104,21 +104,24 @@ export default function CreateWagerForm({ match_timestamp }) {
       const wagerResult = await db.weaveDB.set(
         createWagerDTO,
         "wagers",
-        `${createWagerDTO.match_id}-${createWagerDTO.creator_address}`
+        `${createWagerDTO.match_id}-${createWagerDTO.creator_address}`,
+        db.tempIdentity
       );
 
       if (!wagerResult.success) throw new Error("Failed to create wager");
 
       // Wait for 2 seconds to give both singing different Nonces and prevent Error
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       const predictionResult = await db.weaveDB.set(
         createPredictionDTO,
         "predictions",
-        `${createPredictionDTO.wager_id}-${createPredictionDTO.user_address}`
+        `${createPredictionDTO.wager_id}-${createPredictionDTO.user_address}`,
+        db.tempIdentity
       );
 
-      if (!predictionResult.success) throw new Error("Failed to create wager");
+      if (!predictionResult.success)
+        throw new Error("Failed to create prediction");
 
       setIsPending(false);
       toast({

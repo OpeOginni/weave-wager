@@ -16,15 +16,8 @@ const config = getDefaultConfig({
   appName: "Weave Wager",
   projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_ID,
   chains: [
-    // arbitrum,
-    hardhat,
-    ...(process.env.NEXT_PUBLIC_ENABLE_TESTNETS === "true"
-      ? [arbitrumSepolia]
-      : []),
+    arbitrumSepolia,
   ],
-  transports: {
-    [hardhat.id]: http(""),
-  },
   ssr: true,
 });
 

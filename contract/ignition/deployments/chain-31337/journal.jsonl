@@ -7,5 +7,3 @@
 {"futureId":"WeaveWager#WeaveWager","networkInteractionId":1,"nonce":0,"transaction":{"fees":{"maxFeePerGas":{"_kind":"bigint","value":"3300000000"},"maxPriorityFeePerGas":{"_kind":"bigint","value":"1100000000"}},"hash":"0xb897c5223676c90255f8eb7fd2a37b449c79d36a303245437b2f7bbafd5c53ff"},"type":"TRANSACTION_SEND"}
 {"futureId":"WeaveWager#WeaveWager","networkInteractionId":1,"type":"ONCHAIN_INTERACTION_DROPPED"}
 {"futureId":"WeaveWager#WeaveWager","networkInteractionId":1,"nonce":0,"transaction":{"fees":{"maxFeePerGas":{"_kind":"bigint","value":"3630000000"},"maxPriorityFeePerGas":{"_kind":"bigint","value":"1210000000"}},"hash":"0x06a36855ba97630b6dec9b75594f7d84d6b8db5e2417efea2a1e67e57bdf4cd6"},"type":"TRANSACTION_SEND"}
-{"futureId":"WeaveWager#WeaveWager","networkInteractionId":1,"type":"ONCHAIN_INTERACTION_DROPPED"}
-{"futureId":"WeaveWager#WeaveWager","networkInteractionId":1,"nonce":0,"transaction":{"fees":{"maxFeePerGas":{"_kind":"bigint","value":"3993000000"},"maxPriorityFeePerGas":{"_kind":"bigint","value":"1331000000"}},"hash":"0xe4ee42235af9536babb225a5f5ba2282ff7b0f7df21c1493ab3e7d2778592e5c"},"type":"TRANSACTION_SEND"}

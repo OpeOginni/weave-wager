@@ -23,7 +23,7 @@ import {
 import { Input } from "./ui/input";
 import { config } from "../config/config";
 import { joinWagerAbi, resolveWagerAbi } from "../abi/weaveWager";
-import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { useWriteContract } from "wagmi";
 import { useToast } from "./ui/use-toast";
 import { useState } from "react";
 
@@ -88,7 +88,8 @@ export function WagerButton({ wager_stake }) {
       await db.weaveDB.set(
         dto,
         "predictions",
-        `${dto.wager_id}-${dto.user_address}`
+        `${dto.wager_id}-${dto.user_address}`,
+        db.tempIdentity
       );
       setIsPending(false);
       toast({
@@ -165,25 +166,34 @@ export function WagerButton({ wager_stake }) {
 export function ResolveWagerButton({ wager_id }) {
   const [isPending, setIsPending] = useState(false);
   const db = useWeaveDBContext();
+  const { toast } = useToast();
+  const { writeContractAsync } = useWriteContract();
 
   async function resolveWager() {
     try {
       setIsPending(true);
 
-      const wagers = await db.get(
+      const wagers = await db.weaveDB.get(
         "wagers",
         ["wager_id"],
         ["wager_id", "==", wager_id]
       );
 
+      console.log(wagers);
+
       const wager = wagers[0];
 
-      const match = await db.get("matches", wager.match_id);
+      const match = await db.weaveDB.get("matches", wager.match_id);
+
+      console.log(match);
 
       if (match.winners_choosen)
         throw new Error("Winners have been choosen already");
 
-      const wagerPredictions = await db.get(
+      if (match.status === "ONGOING" || !match.status)
+        throw new Error("Match result not available Yet");
+
+      const wagerPredictions = await db.weaveDB.get(
         "predictions",
         ["wager_id"],
         ["wager_id", "==", wager.wager_id]
@@ -197,18 +207,28 @@ export function ResolveWagerButton({ wager_id }) {
         }
       }
 
-      await db.set(
+      console.log(wagerWinners);
+
+      // await writeContractAsync({
+      //   address: CONTRACT_ADDRESS,
+      //   abi: resolveWagerAbi,
+      //   functionName: "resolveWager",
+      //   args: [BigInt(wager_id), wagerWinners],
+      // });
+
+      await db.weaveDB.set(
         { wager_id: wager.wager_id, winners: wagerWinners },
         "winners",
-        wager.wager_id
+        wager.wager_id,
+        db.tempIdentity
       );
-      await writeContractAsync({
-        address: CONTRACT_ADDRESS,
-        abi: resolveWagerAbi,
-        functionName: "resolveWager",
-        args: [BigInt(wager_id), wagerWinners],
-      });
 
+      await db.weaveDB.update(
+        { winners_choosen: true },
+        "wagers",
+        `${wager.match_id}-${wager.creator_address}`,
+        db.tempIdentity
+      );
       setIsPending(false);
       toast({
         title: "Wager Resolved",

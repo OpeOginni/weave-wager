@@ -7,17 +7,21 @@ export default function useWeaveDB() {
   const { account, isConnected } = useAccount();
 
   const [weaveDB, setWeaveDB] = useState(null);
-  const [tempIdenity, setTempIdentity] = useState(null);
+  const [tempIdentity, setTempIdentity] = useState(null);
 
   useEffect(() => {
     async function init() {
       const db = new SDK({ contractTxId: CONTRACT_TX_ID, nocache: true });
       await db.init();
       setWeaveDB(db);
+      if (isConnected) {
+        const { identity } = await db.createTempAddress();
+        setTempIdentity(identity);
+      }
     }
 
     init();
-  }, []);
+  }, [isConnected]);
 
-  return { weaveDB, tempIdenity };
+  return { weaveDB, tempIdentity };
 }

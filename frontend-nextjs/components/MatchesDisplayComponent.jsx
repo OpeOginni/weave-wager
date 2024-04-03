@@ -78,7 +78,7 @@ export default function MatchesDisplay() {
   }
 
   return (
-    <div className="grid grid-cols-3 px-9 py-5 gap-5">
+    <div className="grid grid-cols-2 px-9 py-5 gap-5 lg:grid-cols-3">
       {matches.length === 0 ? (
         <div className="flex flex-col col-span-3 items-center justify-center">
           <GhostIcon className="w-10 h-10 text-gray-500" />
