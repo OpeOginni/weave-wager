@@ -296,7 +296,7 @@ export function ShareWagerButton({ wager_id }) {
       className="flex flex-row gap-2 border"
       onClick={() => {
         navigator.clipboard.writeText(
-          `http://localhost:3000/wager/${wager_id}`
+          `${process.env.NEXT_PUBLIC_SITE_URL}/wager/${wager_id}`
         );
 
         toast({
