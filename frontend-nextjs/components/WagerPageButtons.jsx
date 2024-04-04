@@ -22,7 +22,11 @@ import {
 } from "./ui/form";
 import { Input } from "./ui/input";
 import { config } from "../config/config";
-import { joinWagerAbi, resolveWagerAbi } from "../abi/weaveWager";
+import {
+  joinWagerAbi,
+  resolveWagerAbi,
+  cancleWagerAbi,
+} from "../abi/weaveWager";
 import { useWriteContract } from "wagmi";
 import { useToast } from "./ui/use-toast";
 import { useState } from "react";
@@ -88,8 +92,7 @@ export function WagerButton({ wager_stake }) {
       await db.weaveDB.set(
         dto,
         "predictions",
-        `${dto.wager_id}-${dto.user_address}`,
-        db.tempIdentity
+        `${dto.wager_id}-${dto.user_address}`
       );
       setIsPending(false);
       toast({
@@ -179,13 +182,9 @@ export function ResolveWagerButton({ wager_id }) {
         ["wager_id", "==", wager_id]
       );
 
-      console.log(wagers);
-
       const wager = wagers[0];
 
       const match = await db.weaveDB.get("matches", wager.match_id);
-
-      console.log(match);
 
       if (match.winners_choosen)
         throw new Error("Winners have been choosen already");
@@ -207,28 +206,19 @@ export function ResolveWagerButton({ wager_id }) {
         }
       }
 
-      console.log(wagerWinners);
-
-      // await writeContractAsync({
-      //   address: CONTRACT_ADDRESS,
-      //   abi: resolveWagerAbi,
-      //   functionName: "resolveWager",
-      //   args: [BigInt(wager_id), wagerWinners],
-      // });
+      await writeContractAsync({
+        address: CONTRACT_ADDRESS,
+        abi: resolveWagerAbi,
+        functionName: "resolveWager",
+        args: [BigInt(wager_id), wagerWinners],
+      });
 
       await db.weaveDB.set(
         { wager_id: wager.wager_id, winners: wagerWinners },
         "winners",
-        wager.wager_id,
-        db.tempIdentity
+        wager.wager_id
       );
 
-      await db.weaveDB.update(
-        { winners_choosen: true },
-        "wagers",
-        `${wager.match_id}-${wager.creator_address}`,
-        db.tempIdentity
-      );
       setIsPending(false);
       toast({
         title: "Wager Resolved",
@@ -251,6 +241,49 @@ export function ResolveWagerButton({ wager_id }) {
       onClick={() => resolveWager()}
     >
       {isPending ? "Resolving Wager" : "Resolve Wager"}
+    </Button>
+  );
+}
+
+export function CancelWagerButton({ wager_id }) {
+  const [isPending, setIsPending] = useState(false);
+  const db = useWeaveDBContext();
+  const { toast } = useToast();
+  const { writeContractAsync } = useWriteContract();
+
+  async function cancleWager() {
+    try {
+      setIsPending(true);
+
+      await writeContractAsync({
+        address: CONTRACT_ADDRESS,
+        abi: cancleWagerAbi,
+        functionName: "cancleWager",
+        args: [BigInt(wager_id)],
+      });
+
+      setIsPending(false);
+      toast({
+        title: "Wager Cancled",
+      });
+    } catch (e) {
+      setIsPending(false);
+      toast({
+        title: "Error",
+        variant: "destructive",
+        description: e.message,
+      });
+      console.log(e);
+    }
+  }
+
+  return (
+    <Button
+      disabled={isPending}
+      className="border"
+      onClick={() => cancleWager()}
+    >
+      {isPending ? "Canceling Wager..." : "Cancle Wager"}
     </Button>
   );
 }

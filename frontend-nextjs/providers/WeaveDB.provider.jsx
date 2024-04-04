@@ -8,20 +8,22 @@ export default function useWeaveDB() {
 
   const [weaveDB, setWeaveDB] = useState(null);
   const [tempIdentity, setTempIdentity] = useState(null);
+  const [hasCreatedTempAddress, setHasCreatedTempAddress] = useState(false);
 
   useEffect(() => {
     async function init() {
       const db = new SDK({ contractTxId: CONTRACT_TX_ID, nocache: true });
       await db.init();
       setWeaveDB(db);
-      if (isConnected) {
-        const { identity } = await db.createTempAddress();
-        setTempIdentity(identity);
-      }
+      // if (!isConnected || hasCreatedTempAddress) return; // Don't create the temp address if the user is not connected or it has already been created
+
+      // const { identity } = await db.createTempAddress();
+      // setTempIdentity(identity);
+      // setHasCreatedTempAddress(true); // Set this to true after the temp address has been created
     }
 
     init();
-  }, [isConnected]);
+  }, []);
 
   return { weaveDB, tempIdentity };
 }

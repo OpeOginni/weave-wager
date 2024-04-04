@@ -779,3 +779,19 @@ export const joinWagerAbi = [
     type: "function",
   },
 ];
+
+export const cancleWagerAbi = [
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_wagerId",
+        type: "uint256",
+      },
+    ],
+    name: "cancleWager",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+];

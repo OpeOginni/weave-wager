@@ -55,8 +55,7 @@ export default function CreateMatchForm() {
       const matchResult = await db.weaveDB.set(
         createMatchDTO,
         "matches",
-        createMatchDTO.match_id,
-        db.tempIdentity
+        createMatchDTO.match_id
       );
 
       if (!matchResult.success) throw new Error("Failed to create wager");

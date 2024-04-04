@@ -3,6 +3,7 @@ import {
   ShareWagerButton,
   JoinedWagerButton,
   ResolveWagerButton,
+  CancelWagerButton,
 } from "../../components/WagerPageButtons";
 import { Minus } from "lucide-react";
 import { useWeaveDBContext } from "../../providers/WeaveDBContext";
@@ -29,6 +30,8 @@ export default function WagerPage() {
 
   const [match, setMatch] = useState(null);
   const [prediction, setPrediction] = useState(null);
+  const [winners, setWinners] = useState(null);
+
   const [isFetchingPrediction, setIsFetchingPrediction] = useState(false);
 
   const wagerId = router.query.wager_id;
@@ -60,34 +63,29 @@ export default function WagerPage() {
       try {
         setIsFetchingPrediction(true);
         if (db.weaveDB && wager) {
-          console.log(isParticipant);
-          console.log("wager");
-
-          console.log(wager);
-
           const fecthedMatch = await db.weaveDB.get(
             "matches",
             ["match_id"],
             ["match_id", "==", Number(wager.result.matchId).toString()]
           );
 
-          console.log("fecthedMatch");
-          console.log(fecthedMatch);
-
           if (fecthedMatch.length === 0) return router.push("/");
 
           setMatch(fecthedMatch[0]);
+
+          const fetchedWinners = await db.weaveDB.get(
+            "winners",
+            Number(wager.result.id).toString()
+          );
+
+          setWinners(fetchedWinners);
         }
 
         if (db.weaveDB && isParticipant?.result) {
-          console.log(`${Number(wager.result.id)}-${address}`);
           const fetchedPrediction = await db.weaveDB.get(
             "predictions",
             `${Number(wager.result.id)}-${address}`
           );
-
-          console.log("fetchedPrediction");
-          console.log(fetchedPrediction);
 
           setPrediction(fetchedPrediction);
           setIsFetchingPrediction(false);
@@ -239,7 +237,21 @@ export default function WagerPage() {
         wager.result.winners_choosen ? (
           <ResolveWagerButton />
         ) : null} */}
-        {!wager.resolved ? <ResolveWagerButton wager_id={wagerId} /> : null}
+        {!wager?.result.resolved &&
+        Number(wager?.result.totalEntries) < 2 &&
+        isParticipant?.result ? (
+          <CancelWagerButton wager_id={wagerId} />
+        ) : !wager?.result.resolved &&
+          match?.match_timestamp * 1000 < Date.now() &&
+          isParticipant?.result &&
+          !wager?.result.resolved ? (
+          <ResolveWagerButton wager_id={wagerId} />
+        ) : null}
+
+        {/* {!wager.resolved && match?.match_timestamp * 1000 < Date.now() ? (
+          <ResolveWagerButton wager_id={wagerId} />
+        ) : null} */}
+
         {match?.status === "COMPLETED" ? (
           <WagerResultComponent wager_id={wagerId} />
         ) : (

@@ -35,12 +35,6 @@ export default function CreateWagerPage() {
     if (!isConnected) return router.push("/");
     async function getMatch() {
       if (db.weaveDB && isFetched) {
-        console.log(data);
-
-        // const { identity: _identity } = await db.weaveDB.createTempAddress();
-
-        // setIdentity(_identity);
-
         if (data === true) {
           const fetchedWager = await db.weaveDB.get(
             "wagers",
@@ -55,9 +49,6 @@ export default function CreateWagerPage() {
           ["match_id"],
           ["match_id", "==", router.query.match_id]
         );
-
-        console.log("fecthedMatch");
-        console.log(fecthedMatch);
 
         if (fecthedMatch.length === 0) return router.push("/");
 
