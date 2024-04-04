@@ -82,7 +82,7 @@ export default function CreateWagerPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="flex flex-col border border-black rounded-xl mx-[15rem] my-7 py-14">
+      <div className="flex flex-col border border-black rounded-xl mx-[15rem] lg:mx-[30rem] my-7 py-14">
         <div className="flex justify-between gap-6 items-center px-7">
           <div
             id="home-team"
@@ -123,7 +123,7 @@ export default function CreateWagerPage() {
           )}
         </div>
       </div>
-      <div className=" py-8 mx-[20rem]">
+      <div className=" py-8 mx-[20rem] lg:mx-[30rem]">
         {match ? (
           <CreateWagerForm
             match_timestamp={match.match_timestamp}

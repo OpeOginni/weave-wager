@@ -147,7 +147,7 @@ export default function WagerPage() {
           No of Participants: {Number(wager.result.totalEntries)}
         </p>
       </div>
-      <div className="flex flex-col text-center border border-black rounded-xl mx-[15rem] my-7 py-14">
+      <div className="flex flex-col text-center border border-black rounded-xl mx-[15rem] lg:mx-[30rem] my-7 py-14">
         <p className={cn(montserrat.className, "font-extrabold")}>
           STAKE: {Number(formatEther(wager.result.stake))} ETH
         </p>

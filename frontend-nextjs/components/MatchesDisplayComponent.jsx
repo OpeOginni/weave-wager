@@ -73,6 +73,8 @@ export default function MatchesDisplay() {
         <Skeleton className="h-[182px] bg-gray-300" />
         <Skeleton className="h-[182px] bg-gray-300" />
         <Skeleton className="h-[182px] bg-gray-300" />
+        <Skeleton className="h-[182px] bg-gray-300" />
+        <Skeleton className="h-[182px] bg-gray-300" />
       </div>
     );
   }
