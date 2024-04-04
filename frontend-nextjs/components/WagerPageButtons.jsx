@@ -30,6 +30,8 @@ import {
 import { useWriteContract } from "wagmi";
 import { useToast } from "./ui/use-toast";
 import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
 
 const wagerFormSchema = z.object({
   home: z
@@ -312,6 +314,27 @@ export function ShareWagerButton({ wager_id }) {
     >
       SHARE WAGER <Copy />
     </Button>
+  );
+}
+
+export function ShareWagerToFarcasterButton({ wager_id }) {
+  const wagerLink = `${process.env.NEXT_PUBLIC_SITE_URL}/wager/${wager_id}`;
+  const message = `Hey, you are welcome to join my wager on Weave Wager using this link ⚽️🎉: ${wagerLink}`;
+
+  const encodedMessage = encodeURIComponent(message);
+
+  return (
+    <Link href={`https://warpcast.com/~/compose?text=${encodedMessage}`}>
+      <Button className="flex flex-row gap-2 border">
+        SHARE TO FARCASTER
+        <Image
+          src={"/farcaster.png"}
+          alt="farcaster-icon"
+          width={"10px"}
+          height={"10px"}
+        />
+      </Button>
+    </Link>
   );
 }
 

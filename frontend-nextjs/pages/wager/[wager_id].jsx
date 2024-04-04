@@ -4,6 +4,7 @@ import {
   JoinedWagerButton,
   ResolveWagerButton,
   CancelWagerButton,
+  ShareWagerToFarcasterButton,
 } from "../../components/WagerPageButtons";
 import { Minus } from "lucide-react";
 import { useWeaveDBContext } from "../../providers/WeaveDBContext";
@@ -124,7 +125,12 @@ export default function WagerPage() {
   if (match?.match_timestamp * 1000 < Date.now()) {
     button = <p>Match has ended</p>;
   } else if (wager?.result.creator === address) {
-    button = <ShareWagerButton wager_id={wagerId} />;
+    button = (
+      <div className="flex flex-col items-center justify-center gap-3">
+        <ShareWagerButton wager_id={wagerId} />
+        <ShareWagerToFarcasterButton wager_id={wagerId} />
+      </div>
+    );
   } else if (isParticipant?.result) {
     button = <JoinedWagerButton />;
   } else if (wager?.result.stake) {
@@ -232,11 +238,6 @@ export default function WagerPage() {
         </div>
       </div>
       <div className="flex flex-col gap-3 justify-center items-center py-24">
-        {/* {match?.status === "COMPLETED" &&
-        !match.resolved &&
-        wager.result.winners_choosen ? (
-          <ResolveWagerButton />
-        ) : null} */}
         {!wager?.result.resolved &&
         Number(wager?.result.totalEntries) < 2 &&
         isParticipant?.result ? (
@@ -247,10 +248,6 @@ export default function WagerPage() {
           !wager?.result.resolved ? (
           <ResolveWagerButton wager_id={wagerId} />
         ) : null}
-
-        {/* {!wager.resolved && match?.match_timestamp * 1000 < Date.now() ? (
-          <ResolveWagerButton wager_id={wagerId} />
-        ) : null} */}
 
         {match?.status === "COMPLETED" ? (
           <WagerResultComponent wager_id={wagerId} />
