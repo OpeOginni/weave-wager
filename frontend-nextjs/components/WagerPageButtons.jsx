@@ -81,6 +81,15 @@ export function WagerButton({ wager_stake }) {
     };
     try {
       setIsPending(true);
+
+      const tx = await db.weaveDB.set(
+        dto,
+        "predictions",
+        `${dto.wager_id}-${dto.user_address}`
+      );
+
+      if (!tx.success) throw new Error("Failed to create Prediction");
+
       await writeContractAsync({
         address: CONTRACT_ADDRESS,
         abi: joinWagerAbi,
@@ -89,11 +98,6 @@ export function WagerButton({ wager_stake }) {
         value: wager_stake,
       });
 
-      await db.weaveDB.set(
-        dto,
-        "predictions",
-        `${dto.wager_id}-${dto.user_address}`
-      );
       setIsPending(false);
       toast({
         title: "Prediction Created",
@@ -206,18 +210,20 @@ export function ResolveWagerButton({ wager_id }) {
         }
       }
 
+      const tx = await db.weaveDB.set(
+        { wager_id: wager.wager_id, winners: wagerWinners },
+        "winners",
+        wager.wager_id
+      );
+
+      if (!tx.success) throw new Error("Failed to set Winners");
+
       await writeContractAsync({
         address: CONTRACT_ADDRESS,
         abi: resolveWagerAbi,
         functionName: "resolveWager",
         args: [BigInt(wager_id), wagerWinners],
       });
-
-      await db.weaveDB.set(
-        { wager_id: wager.wager_id, winners: wagerWinners },
-        "winners",
-        wager.wager_id
-      );
 
       setIsPending(false);
       toast({
